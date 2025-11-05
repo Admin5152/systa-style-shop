@@ -11,6 +11,7 @@ import { useCart } from "@/hooks/useCart";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Contact from "./pages/Contact";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { toast } from "sonner";
 
@@ -55,12 +56,13 @@ const App = () => {
               cartItemCount={getItemCount()}
               onCartClick={() => setIsCartOpen(true)}
             />
-            <Routes>
-              <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
-              <Route path="/products" element={<Products onAddToCart={handleAddToCart} />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+          <Routes>
+            <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
+            <Route path="/products" element={<Products onAddToCart={handleAddToCart} />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
 
             <CartModal
               isOpen={isCartOpen}

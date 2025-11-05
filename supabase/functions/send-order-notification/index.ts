@@ -1,7 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,7 +10,7 @@ interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  image: string;
+  image?: string;
 }
 
 interface OrderNotificationRequest {
@@ -47,124 +44,146 @@ const handler = async (req: Request): Promise<Response> => {
       </tr>
     `).join('');
 
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    
+    if (!RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY not configured");
+    }
+
     // Send notification to store owner
-    const ownerEmailResponse = await resend.emails.send({
-      from: "SYSTA SYSTA Store <onboarding@resend.dev>",
-      to: ["sethagyeimensah2@gmail.com"],
-      subject: `New Order from ${full_name}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #7c3aed; border-bottom: 3px solid #7c3aed; padding-bottom: 10px;">
-            New Order Received! 🎉
-          </h1>
-          
-          <h2 style="color: #333; margin-top: 30px;">Customer Details</h2>
-          <table style="width: 100%; margin: 20px 0;">
-            <tr>
-              <td style="padding: 8px; font-weight: bold;">Name:</td>
-              <td style="padding: 8px;">${full_name}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; font-weight: bold;">Email:</td>
-              <td style="padding: 8px;">${email}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; font-weight: bold;">Phone:</td>
-              <td style="padding: 8px;">${phone_number}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; font-weight: bold;">Delivery Address:</td>
-              <td style="padding: 8px;">${delivery_address}</td>
-            </tr>
-          </table>
-
-          <h2 style="color: #333; margin-top: 30px;">Order Items</h2>
-          <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f3e8ff;">
-                <th style="padding: 10px; text-align: left;">Item</th>
-                <th style="padding: 10px; text-align: right;">Price</th>
+    const ownerEmailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "SYSTA SYSTA Store <onboarding@resend.dev>",
+        to: ["sethagyeimensah2@gmail.com"],
+        subject: `New Order from ${full_name}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #7c3aed; border-bottom: 3px solid #7c3aed; padding-bottom: 10px;">
+              New Order Received! 🎉
+            </h1>
+            
+            <h2 style="color: #333; margin-top: 30px;">Customer Details</h2>
+            <table style="width: 100%; margin: 20px 0;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Name:</td>
+                <td style="padding: 8px;">${full_name}</td>
               </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-            <tfoot>
-              <tr style="background-color: #7c3aed; color: white; font-weight: bold;">
-                <td style="padding: 15px;">Total Amount</td>
-                <td style="padding: 15px; text-align: right;">GHS ${total_amount.toFixed(2)}</td>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Email:</td>
+                <td style="padding: 8px;">${email}</td>
               </tr>
-            </tfoot>
-          </table>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Phone:</td>
+                <td style="padding: 8px;">${phone_number}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Delivery Address:</td>
+                <td style="padding: 8px;">${delivery_address}</td>
+              </tr>
+            </table>
 
-          <p style="color: #666; margin-top: 30px;">
-            Please contact the customer to confirm delivery details.
-          </p>
-        </div>
-      `,
+            <h2 style="color: #333; margin-top: 30px;">Order Items</h2>
+            <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: #f3e8ff;">
+                  <th style="padding: 10px; text-align: left;">Item</th>
+                  <th style="padding: 10px; text-align: right;">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+              <tfoot>
+                <tr style="background-color: #7c3aed; color: white; font-weight: bold;">
+                  <td style="padding: 15px;">Total Amount</td>
+                  <td style="padding: 15px; text-align: right;">GHS ${total_amount.toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <p style="color: #666; margin-top: 30px;">
+              Please contact the customer to confirm delivery details.
+            </p>
+          </div>
+        `,
+      }),
     });
 
-    console.log("Owner notification sent:", ownerEmailResponse);
+    const ownerData = await ownerEmailResponse.json();
+    console.log("Owner notification sent:", ownerData);
 
     // Send confirmation to customer
-    const customerEmailResponse = await resend.emails.send({
-      from: "SYSTA SYSTA <onboarding@resend.dev>",
-      to: [email],
-      subject: "Order Confirmation - SYSTA SYSTA",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #7c3aed; border-bottom: 3px solid #7c3aed; padding-bottom: 10px;">
-            Thank You for Your Order! 💜
-          </h1>
-          
-          <p style="font-size: 16px; color: #333;">Dear ${full_name},</p>
-          
-          <p style="font-size: 16px; color: #333;">
-            We've received your order and will contact you shortly to confirm delivery details.
-          </p>
+    const customerEmailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "SYSTA SYSTA <onboarding@resend.dev>",
+        to: [email],
+        subject: "Order Confirmation - SYSTA SYSTA",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #7c3aed; border-bottom: 3px solid #7c3aed; padding-bottom: 10px;">
+              Thank You for Your Order! 💜
+            </h1>
+            
+            <p style="font-size: 16px; color: #333;">Dear ${full_name},</p>
+            
+            <p style="font-size: 16px; color: #333;">
+              We've received your order and will contact you shortly to confirm delivery details.
+            </p>
 
-          <h2 style="color: #333; margin-top: 30px;">Your Order</h2>
-          <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f3e8ff;">
-                <th style="padding: 10px; text-align: left;">Item</th>
-                <th style="padding: 10px; text-align: right;">Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-            <tfoot>
-              <tr style="background-color: #7c3aed; color: white; font-weight: bold;">
-                <td style="padding: 15px;">Total Amount</td>
-                <td style="padding: 15px; text-align: right;">GHS ${total_amount.toFixed(2)}</td>
-              </tr>
-            </tfoot>
-          </table>
+            <h2 style="color: #333; margin-top: 30px;">Your Order</h2>
+            <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: #f3e8ff;">
+                  <th style="padding: 10px; text-align: left;">Item</th>
+                  <th style="padding: 10px; text-align: right;">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+              <tfoot>
+                <tr style="background-color: #7c3aed; color: white; font-weight: bold;">
+                  <td style="padding: 15px;">Total Amount</td>
+                  <td style="padding: 15px; text-align: right;">GHS ${total_amount.toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>
 
-          <h2 style="color: #333; margin-top: 30px;">Delivery Address</h2>
-          <p style="padding: 15px; background-color: #f9fafb; border-left: 4px solid #7c3aed;">
-            ${delivery_address}
-          </p>
+            <h2 style="color: #333; margin-top: 30px;">Delivery Address</h2>
+            <p style="padding: 15px; background-color: #f9fafb; border-left: 4px solid #7c3aed;">
+              ${delivery_address}
+            </p>
 
-          <p style="color: #666; margin-top: 30px;">
-            If you have any questions, please contact us at veagyeimensah@gmail.com or call 0597868871.
-          </p>
+            <p style="color: #666; margin-top: 30px;">
+              If you have any questions, please contact us at veagyeimensah@gmail.com or call 0597868871.
+            </p>
 
-          <p style="color: #7c3aed; font-weight: bold; margin-top: 30px;">
-            #SYSTASYSTA #BuubuVibes #EffortlessElegance
-          </p>
-        </div>
-      `,
+            <p style="color: #7c3aed; font-weight: bold; margin-top: 30px;">
+              #SYSTASYSTA #BuubuVibes #EffortlessElegance
+            </p>
+          </div>
+        `,
+      }),
     });
 
-    console.log("Customer confirmation sent:", customerEmailResponse);
+    const customerData = await customerEmailResponse.json();
+    console.log("Customer confirmation sent:", customerData);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        ownerEmail: ownerEmailResponse,
-        customerEmail: customerEmailResponse 
+        ownerEmail: ownerData,
+        customerEmail: customerData 
       }),
       {
         status: 200,

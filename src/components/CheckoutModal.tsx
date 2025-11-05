@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { CartItem } from "@/types/product";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { orderSchema, escapeHtml } from "@/lib/validation";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ interface CheckoutModalProps {
 }
 
 export function CheckoutModal({ isOpen, onClose, cart, total, onSuccess }: CheckoutModalProps) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -25,34 +28,102 @@ export function CheckoutModal({ isOpen, onClose, cart, total, onSuccess }: Check
     deliveryAddress: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check authentication status
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check authentication
+    if (!user) {
+      toast.error("Please sign in to place an order");
+      navigate("/auth");
+      onClose();
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Prepare order data
-      const orderData = {
+      // Validate form data
+      const validationResult = orderSchema.safeParse({
         full_name: formData.fullName,
         email: formData.email,
         phone_number: formData.phoneNumber,
         delivery_address: formData.deliveryAddress,
-        items: JSON.parse(JSON.stringify(cart)),
-        total_amount: total,
+      });
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast.error(firstError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate order total server-side
+      const { data: validationData, error: validationError } = await supabase.functions.invoke(
+        "validate-order",
+        {
+          body: {
+            items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
+            total_amount: total,
+          },
+        }
+      );
+
+      if (validationError || !validationData?.valid) {
+        toast.error("Order validation failed. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Prepare sanitized order data
+      const orderData = {
+        user_id: user.id,
+        full_name: escapeHtml(validationResult.data.full_name),
+        email: validationResult.data.email,
+        phone_number: validationResult.data.phone_number,
+        delivery_address: escapeHtml(validationResult.data.delivery_address),
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        total_amount: validationData.calculated_total,
       };
 
       // Save order to database
-      const { data: order, error: dbError } = await supabase
+      const { error: dbError } = await supabase
         .from("orders")
-        .insert([orderData])
-        .select()
-        .single();
+        .insert([orderData]);
 
       if (dbError) throw dbError;
 
       // Send email notification
       const { error: emailError } = await supabase.functions.invoke("send-order-notification", {
-        body: orderData,
+        body: {
+          full_name: orderData.full_name,
+          email: orderData.email,
+          phone_number: orderData.phone_number,
+          delivery_address: orderData.delivery_address,
+          items: orderData.items,
+          total_amount: orderData.total_amount,
+        },
       });
 
       if (emailError) {
@@ -83,6 +154,14 @@ export function CheckoutModal({ isOpen, onClose, cart, total, onSuccess }: Check
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Order Summary</DialogTitle>
         </DialogHeader>
+
+        {!user && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-yellow-800">
+              Please <button onClick={() => { onClose(); navigate("/auth"); }} className="underline font-semibold">sign in</button> to place an order.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-4 mb-6">
           {cart.map((item) => (
