@@ -4,6 +4,7 @@ export interface Product {
   description: string;
   price: number;
   image: string;
+  category: 'long' | 'short' | 'fringe' | 'full-set';
 }
 
 export interface CartItem extends Product {

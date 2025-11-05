@@ -13,6 +13,7 @@ export const products: Product[] = [
     description: "Elegant fringe buubu dress with modern styling",
     price: 240.00,
     image: fringeBuubu1,
+    category: 'fringe',
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ export const products: Product[] = [
     description: "Comfortable short buubu dress for everyday wear",
     price: 150.00,
     image: shortBuubu,
+    category: 'short',
   },
   {
     id: 3,
@@ -27,6 +29,7 @@ export const products: Product[] = [
     description: "Classic long buubu dress with timeless elegance",
     price: 180.00,
     image: longBuubu1,
+    category: 'long',
   },
   {
     id: 4,
@@ -34,6 +37,7 @@ export const products: Product[] = [
     description: "Stylish long buubu dress with unique design",
     price: 180.00,
     image: longBuubu2,
+    category: 'long',
   },
   {
     id: 5,
@@ -41,6 +45,7 @@ export const products: Product[] = [
     description: "Premium fringe buubu dress with enhanced details",
     price: 250.00,
     image: fringeBuubu2,
+    category: 'fringe',
   },
   {
     id: 6,
@@ -48,5 +53,16 @@ export const products: Product[] = [
     description: "Deluxe long buubu dress for special occasions",
     price: 200.00,
     image: longBuubu3,
+    category: 'long',
   },
+  // Add more products here by copying and pasting the structure above
+  // Example:
+  // {
+  //   id: 7,
+  //   name: "Your Product Name",
+  //   description: "Your product description",
+  //   price: 150.00,
+  //   image: yourImageImport,
+  //   category: 'long', // or 'short', 'fringe', 'full-set'
+  // },
 ];
