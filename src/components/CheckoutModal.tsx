@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { orderSchema, escapeHtml } from "@/lib/validation";
+import emailjs from "@emailjs/browser";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -114,21 +115,33 @@ export function CheckoutModal({ isOpen, onClose, cart, total, onSuccess }: Check
 
       if (dbError) throw dbError;
 
-      // Send email notification
-      const { error: emailError } = await supabase.functions.invoke("send-order-notification", {
-        body: {
-          full_name: orderData.full_name,
-          email: orderData.email,
-          phone_number: orderData.phone_number,
-          delivery_address: orderData.delivery_address,
-          items: orderData.items,
-          total_amount: orderData.total_amount,
-        },
-      });
+      // Send email notification via EmailJS
+      const itemsList = orderData.items.map(item => 
+        `${item.name} x ${item.quantity} - GHS ${(item.price * item.quantity).toFixed(2)}`
+      ).join('\n');
 
-      if (emailError) {
-        console.error("Email error:", emailError);
-        toast.warning("Order placed but email notification failed");
+      const emailParams = {
+        customer_name: orderData.full_name,
+        customer_email: orderData.email,
+        customer_phone: orderData.phone_number,
+        delivery_address: orderData.delivery_address,
+        order_items: itemsList,
+        total_amount: `GHS ${orderData.total_amount.toFixed(2)}`,
+        order_date: new Date().toLocaleString('en-GB', { 
+          dateStyle: 'medium', 
+          timeStyle: 'short' 
+        }),
+      };
+
+      try {
+        await emailjs.send(
+          'service_suh4kci',
+          'template_quywfnd',
+          emailParams,
+          'bNjvm2lanWsXymhbG'
+        );
+      } catch (emailError) {
+        console.error("Email notification error:", emailError);
       }
 
       toast.success("Order placed successfully! Check your email for confirmation.");
