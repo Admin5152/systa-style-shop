@@ -39,7 +39,7 @@ export default function Contact() {
             </CardHeader>
             <CardContent className="text-center">
               <a
-                href="https://instagram.com/Systa_systa"
+                href="https://www.instagram.com/systa_systa_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
