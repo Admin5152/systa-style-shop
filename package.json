@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://github.com/Admin5152/systa-style-shop.git",
+  "homepage": "https://admin5152.github.io/systa-style-shop/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
