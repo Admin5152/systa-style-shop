@@ -5,7 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? "/systa-style-shop/" : "/",
+  // Use /systa-style-shop/ only for GitHub Pages, "/" for Vercel and development
+  base: mode === 'production' && !process.env.VERCEL ? "/systa-style-shop/" : "/",
   server: {
     host: "::",
     port: 8080,
