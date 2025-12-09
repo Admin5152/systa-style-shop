@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { CartModal } from "@/components/CartModal";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { useCart } from "@/hooks/useCart";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -40,6 +41,7 @@ const AppContent = () => {
     getItemCount,
   } = useCart();
 
+  const [isLoading, setIsLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -77,8 +79,12 @@ const AppContent = () => {
     clearCart();
   };
 
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={() => setIsLoading(false)} />;
+  }
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen animate-fade-in">
       <Navbar
         cartItemCount={getItemCount()}
         onCartClick={() => setIsCartOpen(true)}

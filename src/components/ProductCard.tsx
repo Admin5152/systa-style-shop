@@ -1,36 +1,48 @@
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
+  onClick?: () => void;
 }
 
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export function ProductCard({ product, onAddToCart, onClick }: ProductCardProps) {
   return (
-    <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300">
-      <div className="aspect-[4/5] overflow-hidden bg-muted">
+    <div 
+      className="group cursor-pointer"
+      onClick={onClick}
+    >
+      {/* Compact Amazon-style card */}
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
         <img
           src={product.image}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
+        {/* Quick add button on hover */}
+        <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button 
+            onClick={(e) => { e.stopPropagation(); onAddToCart(product); }} 
+            size="sm" 
+            className="w-full h-8 text-xs"
+          >
+            <ShoppingCart className="h-3 w-3 mr-1" />
+            Add to Cart
+          </Button>
+        </div>
       </div>
-      <CardHeader className="p-4">
-        <h3 className="font-semibold text-lg">{product.name}</h3>
-        <p className="text-sm text-muted-foreground">{product.description}</p>
-      </CardHeader>
-      <CardFooter className="p-4 pt-0 flex items-center justify-between">
-        <span className="text-2xl font-bold text-primary">
+      
+      {/* Compact info section */}
+      <div className="mt-2 space-y-1">
+        <h3 className="font-medium text-sm line-clamp-2 leading-tight">
+          {product.name}
+        </h3>
+        <p className="text-lg font-bold text-primary">
           GHS {product.price.toFixed(2)}
-        </span>
-        <Button onClick={() => onAddToCart(product)} size="sm">
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Add to Cart
-        </Button>
-      </CardFooter>
-    </Card>
+        </p>
+      </div>
+    </div>
   );
 }
