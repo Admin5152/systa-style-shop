@@ -29,7 +29,8 @@ export function LoadingScreen({ onLoadingComplete, minDuration = 3000 }: Loading
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center animate-fade-in">
-      <div className="relative w-full h-full max-w-[140px] max-h-[140px]">
+      <div className="relative w-full h-full max-w-[160px] max-h-[160px]">
+
 
 
         <video
@@ -49,7 +50,7 @@ export function LoadingScreen({ onLoadingComplete, minDuration = 3000 }: Loading
             <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
             <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
           </div>
-          <p className="text-white/80 text-sm font-medium tracking-wide">SYSTA | SYSTA</p>
+          {/* <p className="text-white/80 text-sm font-medium tracking-wide">SYSTA | SYSTA</p> */}
         </div>
       </div>
     </div>
