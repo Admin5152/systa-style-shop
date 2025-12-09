@@ -12,6 +12,7 @@ export const PRODUCT_PRICES: ProductData[] = [
   { id: 4, name: "Long Buubu Dress - Style 2", price: 180.00 },
   { id: 5, name: "Fringe Buubu Dress - Premium", price: 250.00 },
   { id: 6, name: "Long Buubu Dress - Deluxe", price: 200.00 },
+  { id: 7, name: "Long Buubu Dress - Short Sleeve", price: 200.00 },
   // When you add new products, make sure to add them here too with the same ID and price
   // Example:
   // { id: 7, name: "Your Product Name", price: 150.00 },
