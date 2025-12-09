@@ -29,7 +29,8 @@ export function LoadingScreen({ onLoadingComplete, minDuration = 3000 }: Loading
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center animate-fade-in">
-      <div className="relative w-full h-full max-w-lg max-h-96 md:max-w-2xl md:max-h-[500px]">
+      <div className="relative w-full h-full max-w-sm max-h-64 md:max-w-md md:max-h-80">
+
         <video
           autoPlay
           muted
