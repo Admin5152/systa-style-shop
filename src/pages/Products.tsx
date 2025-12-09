@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
+import { SearchBar } from "@/components/SearchBar";
 import { products } from "@/lib/products";
 import { Product } from "@/types/product";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,38 +10,49 @@ interface ProductsProps {
 }
 
 const categories = [
-  { value: 'all', label: 'All Styles' },
-  { value: 'long', label: 'Long Buubu' },
-  { value: 'short', label: 'Short Buubu' },
-  { value: 'fringe', label: 'Fringe Buubu' },
+  { value: 'all', label: 'All' },
+  { value: 'long', label: 'Long' },
+  { value: 'short', label: 'Short' },
+  { value: 'fringe', label: 'Fringe' },
   { value: 'full-set', label: 'Full Set' },
 ];
 
 export default function Products({ onAddToCart }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredProducts = selectedCategory === 'all' 
-    ? products 
-    : products.filter(product => product.category === selectedCategory);
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
-    <div className="min-h-screen py-12 bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-screen pt-4 pb-12 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Our Collection</h1>
-          <p className="text-muted-foreground text-lg">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Our Collection</h1>
+          <p className="text-muted-foreground text-sm">
             Browse our complete range of elegant Buubu dresses
           </p>
         </div>
 
-        <div className="flex justify-center mb-8">
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full max-w-2xl">
-            <TabsList className="grid w-full grid-cols-5 h-auto">
+        {/* Search & Filters */}
+        <div className="sticky top-16 z-20 bg-background pb-4 space-y-4">
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search products..."
+          />
+          
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+            <TabsList className="w-full h-auto flex-wrap justify-start gap-1 bg-transparent p-0">
               {categories.map((category) => (
                 <TabsTrigger 
                   key={category.value} 
                   value={category.value}
-                  className="text-xs sm:text-sm py-2"
+                  className="text-xs px-3 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full border"
                 >
                   {category.label}
                 </TabsTrigger>
@@ -49,7 +61,13 @@ export default function Products({ onAddToCart }: ProductsProps) {
           </Tabs>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Results count */}
+        <p className="text-sm text-muted-foreground mb-4">
+          {filteredProducts.length} product{filteredProducts.length !== 1 && 's'}
+        </p>
+
+        {/* Product Grid - Compact like Amazon */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
           {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -61,15 +79,11 @@ export default function Products({ onAddToCart }: ProductsProps) {
 
         {filteredProducts.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">
-              No products found in this category yet. Check back soon!
+            <p className="text-muted-foreground">
+              No products found. Try a different search or category.
             </p>
           </div>
         )}
-
-        <div className="text-center mt-12">
-          <p className="text-2xl font-bold text-primary">& More!!!</p>
-        </div>
       </div>
     </div>
   );
