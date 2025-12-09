@@ -1,11 +1,19 @@
 import { Product } from "@/types/product";
 import fringeBuubu1 from "@/assets/products/fringe-buubu-1.jpg";
-import shortBuubu from "@/assets/products/short-buubu.jpg";
+import fringeBuubu2 from "@/assets/products/fringe-buubu-2.jpg";
+
 import longBuubu1 from "@/assets/products/long-buubu-1.jpg";
 import longBuubu2 from "@/assets/products/long-buubu-2.jpg";
-import fringeBuubu2 from "@/assets/products/fringe-buubu-2.jpg";
 import longBuubu3 from "@/assets/products/long-buubu-3.jpg";
 import longBuubu4 from "@/assets/products/long-buubu-short-sleeve-1.jpeg";
+import longBuubu5 from "@/assets/products/long-buubu-short-sleeve-2.jpeg";
+import longBuubu6 from "@/assets/products/long-buubu-dress-orange.jpeg";
+
+import shortBuubu1 from "@/assets/products/short-buubu.jpg";
+import shortBuubu2 from "@/assets/products/short-buubu-dress.jpeg";
+import shortBuubu3 from "@/assets/products/AI-short-buubu.jpg";
+import shortBuubu4 from "@/assets/products/short-buubu-green.jpg";
+
 
 export const products: Product[] = [
   {
@@ -21,7 +29,7 @@ export const products: Product[] = [
     name: "Short Buubu Dress",
     description: "Comfortable short buubu dress for everyday wear",
     price: 150.00,
-    image: shortBuubu,
+    image: shortBuubu1,
     category: 'short',
   },
   {
@@ -62,6 +70,54 @@ export const products: Product[] = [
     description: "Deluxe long buubu dress for special occasions",
     price: 200.00,
     image: longBuubu4,
+    category: 'long',
+  },
+  {
+    id: 8,
+    name: "Long Buubu Dress - Christmas style 1",
+    description: "Deluxe long buubu dress for special occasions",
+    price: 200.00,
+    image: longBuubu5,
+    category: 'long',
+  },
+  {
+    id: 9,
+    name: "Long Buubu Dress - Christmas style 2",
+    description: "Deluxe long buubu dress for special occasions",
+    price: 200.00,
+    image: shortBuubu3,
+    category: 'long',
+  },
+  {
+    id: 10,
+    name: "Short Buubu Dress",
+    description: "Deluxe long buubu dress for special occasions",
+    price: 200.00,
+    image: shortBuubu2,
+    category: 'short',
+  },
+  {
+    id: 11,
+    name: "Short Buubu Dress",
+    description: "Deluxe long buubu dress for special occasions",
+    price: 200.00,
+    image: shortBuubu3,
+    category: 'short',
+  },
+  {
+    id: 12,
+    name: "Short Buubu Dress",
+    description: "Deluxe long buubu dress for special occasions",
+    price: 200.00,
+    image: shortBuubu4,
+    category: 'short',
+  },
+  {
+    id: 13,
+    name: "Long Buubu Dress - Christmas style 3",
+    description: "Deluxe long buubu dress for special occasions",
+    price: 200.00,
+    image: longBuubu6,
     category: 'long',
   },
   // Add more products here by copying and pasting the structure above
