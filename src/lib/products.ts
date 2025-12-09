@@ -12,7 +12,7 @@ import longBuubu6 from "@/assets/products/long-buubu-dress-orange.jpeg";
 import shortBuubu1 from "@/assets/products/short-buubu.jpg";
 import shortBuubu2 from "@/assets/products/short-buubu-dress.jpeg";
 import shortBuubu3 from "@/assets/products/AI-short-buubu.jpg";
-import shortBuubu4 from "@/assets/products/short-buubu-green.jpg";
+import shortBuubu4 from "@/assets/products/short-buubu-dress-green.jpeg";
 
 
 export const products: Product[] = [
@@ -106,7 +106,7 @@ export const products: Product[] = [
   },
   {
     id: 12,
-    name: "Short Buubu Dress",
+    name: "Short Buubu Dress - Green Style",
     description: "Deluxe long buubu dress for special occasions",
     price: 200.00,
     image: shortBuubu4,
