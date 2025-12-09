@@ -7,7 +7,8 @@ import longBuubu2 from "@/assets/products/long-buubu-2.jpg";
 import longBuubu3 from "@/assets/products/long-buubu-3.jpg";
 import longBuubu4 from "@/assets/products/long-buubu-short-sleeve-1.jpeg";
 import longBuubu5 from "@/assets/products/long-buubu-short-sleeve-2.jpeg";
-import longBuubu6 from "@/assets/products/long-buubu-dress-orange.jpeg";
+import longBuubu6 from "@/assets/products/long-buubu-short-sleeve-3.jpeg";
+import longBuubu7 from "@/assets/products/long-buubu-dress-orange.jpeg";
 
 import shortBuubu1 from "@/assets/products/short-buubu.jpg";
 import shortBuubu2 from "@/assets/products/short-buubu-dress.jpeg";
@@ -82,10 +83,10 @@ export const products: Product[] = [
   },
   {
     id: 9,
-    name: "Long Buubu Dress - Christmas style 2",
+    name: "Long Buubu Dress - Blue Style",
     description: "Deluxe long buubu dress for special occasions",
     price: 200.00,
-    image: shortBuubu3,
+    image: longBuubu6,
     category: 'long',
   },
   {
@@ -117,7 +118,7 @@ export const products: Product[] = [
     name: "Long Buubu Dress - Christmas style 3",
     description: "Deluxe long buubu dress for special occasions",
     price: 200.00,
-    image: longBuubu6,
+    image: longBuubu7,
     category: 'long',
   },
   // Add more products here by copying and pasting the structure above
