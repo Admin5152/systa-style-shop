@@ -4,7 +4,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/", // ✅ note the ending slash
+  base: "/systa-style-shop/",
   server: {
     host: "::",
     port: 8080,
