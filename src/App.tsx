@@ -9,13 +9,17 @@ import { CartModal } from "@/components/CartModal";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
+import Profile from "./pages/Profile";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Product } from "@/types/product";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +45,8 @@ const AppContent = () => {
     getItemCount,
   } = useCart();
 
+  const { isInWishlist, toggleWishlist } = useWishlist();
+
   const [isLoading, setIsLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -61,13 +67,28 @@ const AppContent = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product, quantity: number = 1, size: string = "M") => {
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
-    addToCart(product);
-    toast.success(`${product.name} added to cart!`);
+    // Add product with quantity
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product);
+    }
+    toast.success(`${product.name} (${size}) added to cart!`);
+  };
+
+  const handleBuyNow = (product: Product, quantity: number = 1, size: string = "M") => {
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+    // Add to cart and open checkout
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product);
+    }
+    setIsCheckoutOpen(true);
   };
 
   const handleCheckout = () => {
@@ -90,8 +111,38 @@ const AppContent = () => {
         onCartClick={() => setIsCartOpen(true)}
       />
       <Routes>
-        <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
-        <Route path="/products" element={<Products onAddToCart={handleAddToCart} />} />
+        <Route 
+          path="/" 
+          element={
+            <Home 
+              onAddToCart={handleAddToCart} 
+              isInWishlist={isInWishlist}
+              toggleWishlist={toggleWishlist}
+            />
+          } 
+        />
+        <Route 
+          path="/products" 
+          element={
+            <Products 
+              onAddToCart={handleAddToCart}
+              isInWishlist={isInWishlist}
+              toggleWishlist={toggleWishlist}
+            />
+          } 
+        />
+        <Route 
+          path="/product/:id" 
+          element={
+            <ProductDetail 
+              onAddToCart={handleAddToCart}
+              onBuyNow={handleBuyNow}
+              isInWishlist={isInWishlist}
+              toggleWishlist={toggleWishlist}
+            />
+          } 
+        />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="*" element={<NotFound />} />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
 import { FeaturedCarousel } from "@/components/FeaturedCarousel";
@@ -10,9 +11,12 @@ import heroImage from "@/assets/hero-buubu.jpg";
 
 interface HomeProps {
   onAddToCart: (product: Product) => void;
+  isInWishlist: (id: number) => boolean;
+  toggleWishlist: (id: number) => void;
 }
 
-export default function Home({ onAddToCart }: HomeProps) {
+export default function Home({ onAddToCart, isInWishlist, toggleWishlist }: HomeProps) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const featuredProducts = products.slice(0, 4);
   
@@ -78,6 +82,9 @@ export default function Home({ onAddToCart }: HomeProps) {
                   key={product.id}
                   product={product}
                   onAddToCart={onAddToCart}
+                  onClick={() => navigate(`/product/${product.id}`)}
+                  isInWishlist={isInWishlist(product.id)}
+                  onToggleWishlist={() => toggleWishlist(product.id)}
                 />
               ))}
             </div>
@@ -94,7 +101,11 @@ export default function Home({ onAddToCart }: HomeProps) {
           <section className="py-8 md:py-12 bg-background">
             <div className="container mx-auto px-4">
               <h2 className="text-2xl md:text-3xl font-bold mb-6">Featured</h2>
-              <FeaturedCarousel products={featuredProducts} onAddToCart={onAddToCart} />
+              <FeaturedCarousel 
+                products={featuredProducts} 
+                onAddToCart={onAddToCart}
+                onProductClick={(id) => navigate(`/product/${id}`)}
+              />
             </div>
           </section>
 
@@ -114,6 +125,9 @@ export default function Home({ onAddToCart }: HomeProps) {
                     key={product.id}
                     product={product}
                     onAddToCart={onAddToCart}
+                    onClick={() => navigate(`/product/${product.id}`)}
+                    isInWishlist={isInWishlist(product.id)}
+                    onToggleWishlist={() => toggleWishlist(product.id)}
                   />
                 ))}
               </div>

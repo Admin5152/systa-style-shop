@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
 import { SearchBar } from "@/components/SearchBar";
 import { products } from "@/lib/products";
@@ -7,6 +8,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ProductsProps {
   onAddToCart: (product: Product) => void;
+  isInWishlist: (id: number) => boolean;
+  toggleWishlist: (id: number) => void;
 }
 
 const categories = [
@@ -17,7 +20,8 @@ const categories = [
   { value: 'full-set', label: 'Full Set' },
 ];
 
-export default function Products({ onAddToCart }: ProductsProps) {
+export default function Products({ onAddToCart, isInWishlist, toggleWishlist }: ProductsProps) {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -73,6 +77,9 @@ export default function Products({ onAddToCart }: ProductsProps) {
               key={product.id}
               product={product}
               onAddToCart={onAddToCart}
+              onClick={() => navigate(`/product/${product.id}`)}
+              isInWishlist={isInWishlist(product.id)}
+              onToggleWishlist={() => toggleWishlist(product.id)}
             />
           ))}
         </div>
