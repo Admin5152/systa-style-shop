@@ -46,7 +46,7 @@ export function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
             SYSTA | ƧYSTA
           </Link>
           
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 md:gap-6">
             <Link
               to="/"
               className={`text-sm font-medium transition-colors hover:text-primary ${
@@ -65,7 +65,7 @@ export function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
             </Link>
             <Link
               to="/contact"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
+              className={`hidden md:inline text-sm font-medium transition-colors hover:text-primary ${
                 isActive("/contact") ? "text-primary" : "text-muted-foreground"
               }`}
             >
@@ -74,6 +74,14 @@ export function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
             
             {user ? (
               <>
+                <Link
+                  to="/profile"
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    isActive("/profile") ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <User className="h-5 w-5" />
+                </Link>
                 <Button
                   variant="outline"
                   size="icon"
