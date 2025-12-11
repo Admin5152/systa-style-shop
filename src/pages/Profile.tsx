@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Package, Calendar, ArrowLeft } from "lucide-react";
+import { User, Package, Calendar, ArrowLeft, Truck, CheckCircle, Clock } from "lucide-react";
 import { format } from "date-fns";
 
 interface OrderItem {
@@ -20,7 +20,18 @@ interface Order {
   items: OrderItem[];
   total_amount: number;
   delivery_address: string;
+  status?: string;
 }
+
+const getOrderStatus = (createdAt: string) => {
+  const orderDate = new Date(createdAt);
+  const now = new Date();
+  const hoursDiff = (now.getTime() - orderDate.getTime()) / (1000 * 60 * 60);
+  
+  if (hoursDiff < 2) return { label: "Processing", icon: Clock, color: "bg-yellow-500" };
+  if (hoursDiff < 24) return { label: "Shipped", icon: Truck, color: "bg-blue-500" };
+  return { label: "Delivered", icon: CheckCircle, color: "bg-green-500" };
+};
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -118,7 +129,11 @@ export default function Profile() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {orders.map((order) => (
+              {orders.map((order) => {
+                const status = getOrderStatus(order.created_at);
+                const StatusIcon = status.icon;
+                
+                return (
                 <Card key={order.id}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between flex-wrap gap-2">
@@ -126,9 +141,16 @@ export default function Profile() {
                         <Calendar className="h-4 w-4" />
                         {format(new Date(order.created_at), "PPP")}
                       </div>
-                      <Badge variant="secondary">
-                        GHS {order.total_amount.toFixed(2)}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="flex items-center gap-1">
+                          <span className={`w-2 h-2 rounded-full ${status.color}`} />
+                          <StatusIcon className="h-3 w-3" />
+                          {status.label}
+                        </Badge>
+                        <Badge variant="secondary">
+                          GHS {order.total_amount.toFixed(2)}
+                        </Badge>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -162,7 +184,8 @@ export default function Profile() {
                     </Button>
                   </CardContent>
                 </Card>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>

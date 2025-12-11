@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, LogOut, User } from "lucide-react";
+import { ShoppingCart, LogOut, User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
@@ -74,6 +74,14 @@ export function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
             
             {user ? (
               <>
+                <Link
+                  to="/wishlist"
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    isActive("/wishlist") ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <Heart className="h-5 w-5" />
+                </Link>
                 <Link
                   to="/profile"
                   className={`text-sm font-medium transition-colors hover:text-primary ${
