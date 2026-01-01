@@ -13,18 +13,25 @@ export interface Product {
   stock_quantity: number;
 }
 
+const normalizePublicStorageUrl = (url: string) => {
+  // Avoid breaking the protocol (https://) — only collapse repeated slashes
+  // AFTER the bucket segment in public storage URLs.
+  return url
+    .trim()
+    .replace(/(\/storage\/v1\/object\/public\/[^/]+)\/{2,}/g, "$1/");
+};
+
 const getPublicUrl = (imageUrl: string | null): string => {
   if (!imageUrl) return "/placeholder.svg";
-  
-  // If it's already a full Supabase storage URL, return as-is
+
+  // If it's already a full public storage URL, normalize it and return.
+  // (Fixes common issue: pasted URLs like .../public/clothes//file.jpg)
   if (imageUrl.startsWith("http")) {
-    return imageUrl;
+    return normalizePublicStorageUrl(imageUrl);
   }
-  
-  // If it's just a filename or path, build the public URL
-  // Remove any leading slashes
-  const cleanPath = imageUrl.replace(/^\/+/, "");
-  
+
+  // If it's just a filename or path, build the public URL.
+  const cleanPath = imageUrl.trim().replace(/^\/+/, "");
   const { data } = supabase.storage.from("clothes").getPublicUrl(cleanPath);
   return data.publicUrl;
 };
