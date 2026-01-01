@@ -2,14 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
 import { SearchBar } from "@/components/SearchBar";
-import { products } from "@/lib/products";
+import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProductsProps {
   onAddToCart: (product: Product) => void;
-  isInWishlist: (id: number) => boolean;
-  toggleWishlist: (id: number) => void;
+  isInWishlist: (id: string) => boolean;
+  toggleWishlist: (id: string) => void;
 }
 
 const categories = [
@@ -24,6 +25,7 @@ export default function Products({ onAddToCart, isInWishlist, toggleWishlist }: 
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: products = [], isLoading } = useProducts();
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
@@ -67,29 +69,44 @@ export default function Products({ onAddToCart, isInWishlist, toggleWishlist }: 
 
         {/* Results count */}
         <p className="text-sm text-muted-foreground mb-4">
-          {filteredProducts.length} product{filteredProducts.length !== 1 && 's'}
+          {isLoading ? "Loading..." : `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`}
         </p>
 
-        {/* Product Grid - Compact like Amazon */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={onAddToCart}
-              onClick={() => navigate(`/product/${product.id}`)}
-              isInWishlist={isInWishlist(product.id)}
-              onToggleWishlist={() => toggleWishlist(product.id)}
-            />
-          ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              No products found. Try a different search or category.
-            </p>
+        {/* Loading state */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="aspect-square rounded-lg" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-6 w-1/2" />
+              </div>
+            ))}
           </div>
+        ) : (
+          <>
+            {/* Product Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={onAddToCart}
+                  onClick={() => navigate(`/product/${product.id}`)}
+                  isInWishlist={isInWishlist(product.id)}
+                  onToggleWishlist={() => toggleWishlist(product.id)}
+                />
+              ))}
+            </div>
+
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  No products found. Try a different search or category.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

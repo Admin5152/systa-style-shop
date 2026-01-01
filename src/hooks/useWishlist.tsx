@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 const WISHLIST_STORAGE_KEY = "systa-wishlist";
 
 export function useWishlist() {
-  const [wishlist, setWishlist] = useState<number[]>(() => {
+  const [wishlist, setWishlist] = useState<string[]>(() => {
     const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
     return saved ? JSON.parse(saved) : [];
   });
@@ -12,7 +12,7 @@ export function useWishlist() {
     localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const toggleWishlist = (productId: number) => {
+  const toggleWishlist = (productId: string) => {
     setWishlist((prev) =>
       prev.includes(productId)
         ? prev.filter((id) => id !== productId)
@@ -20,7 +20,7 @@ export function useWishlist() {
     );
   };
 
-  const isInWishlist = (productId: number) => wishlist.includes(productId);
+  const isInWishlist = (productId: string) => wishlist.includes(productId);
 
   const clearWishlist = () => setWishlist([]);
 

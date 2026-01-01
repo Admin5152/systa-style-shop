@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/hooks/useCart";
-import { products } from "@/lib/products";
+import { useProducts } from "@/hooks/useProducts";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Product } from "@/types/product";
 
 export default function Wishlist() {
   const navigate = useNavigate();
   const { wishlist, toggleWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { data: products = [] } = useProducts();
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export default function Wishlist() {
 
   const wishlistProducts = products.filter((p) => wishlist.includes(p.id));
 
-  const handleAddToCart = (product: typeof products[0]) => {
+  const handleAddToCart = (product: Product) => {
     if (!user) {
       toast({
         title: "Sign in required",

@@ -4,20 +4,23 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
 import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { SearchBar } from "@/components/SearchBar";
-import { products } from "@/lib/products";
+import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-buubu.jpg";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface HomeProps {
   onAddToCart: (product: Product) => void;
-  isInWishlist: (id: number) => boolean;
-  toggleWishlist: (id: number) => void;
+  isInWishlist: (id: string) => boolean;
+  toggleWishlist: (id: string) => void;
 }
 
 export default function Home({ onAddToCart, isInWishlist, toggleWishlist }: HomeProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: products = [], isLoading } = useProducts();
+  
   const featuredProducts = products.slice(0, 4);
   
   const filteredProducts = searchQuery
@@ -69,8 +72,22 @@ export default function Home({ onAddToCart, isInWishlist, toggleWishlist }: Home
         </div>
       </section>
 
-      {/* Show search results or normal content */}
-      {searchQuery ? (
+      {/* Loading state */}
+      {isLoading ? (
+        <section className="py-8 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="aspect-square rounded-lg" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-6 w-1/2" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : searchQuery ? (
         <section className="py-8 bg-background">
           <div className="container mx-auto px-4">
             <p className="text-sm text-muted-foreground mb-4">
