@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 interface FeaturedCarouselProps {
   products: Product[];
   onAddToCart: (product: Product) => void;
-  onProductClick?: (id: number) => void;
+  onProductClick?: (id: string) => void;
 }
 
 export function FeaturedCarousel({ products, onAddToCart, onProductClick }: FeaturedCarouselProps) {
@@ -23,10 +23,14 @@ export function FeaturedCarousel({ products, onAddToCart, onProductClick }: Feat
   }, [products.length]);
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || products.length === 0) return;
     const interval = setInterval(nextSlide, 4000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying, nextSlide]);
+  }, [isAutoPlaying, nextSlide, products.length]);
+
+  if (products.length === 0) {
+    return null;
+  }
 
   const currentProduct = products[currentIndex];
 

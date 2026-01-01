@@ -1,17 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { products } from "@/lib/products";
+import { useProduct, useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
 import { Heart, Minus, Plus, ShoppingCart, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProductDetailProps {
   onAddToCart: (product: Product, quantity: number, size: string) => void;
   onBuyNow: (product: Product, quantity: number, size: string) => void;
-  isInWishlist: (id: number) => boolean;
-  toggleWishlist: (id: number) => void;
+  isInWishlist: (id: string) => boolean;
+  toggleWishlist: (id: string) => void;
 }
 
 const SIZES = ["S", "M", "L", "XL"];
@@ -27,7 +28,28 @@ export default function ProductDetail({
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("M");
 
-  const product = products.find((p) => p.id === Number(id));
+  const { data: product, isLoading } = useProduct(id || "");
+  const { data: allProducts = [] } = useProducts();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-6">
+          <Skeleton className="h-8 w-20 mb-4" />
+          <div className="grid md:grid-cols-2 gap-8">
+            <Skeleton className="aspect-square rounded-xl" />
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-8 w-1/3" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -39,7 +61,7 @@ export default function ProductDetail({
   }
 
   // Find similar products based on category
-  const similarProducts = products
+  const similarProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 
@@ -50,6 +72,9 @@ export default function ProductDetail({
   const handleBuyNow = () => {
     onBuyNow(product, quantity, selectedSize);
   };
+
+  // Use product sizes if available, otherwise use default sizes
+  const availableSizes = product.size && product.size.length > 0 ? product.size : SIZES;
 
   return (
     <div className="min-h-screen bg-background">
@@ -104,7 +129,7 @@ export default function ProductDetail({
             <div className="space-y-3">
               <label className="text-sm font-medium">Size</label>
               <div className="flex flex-wrap gap-2">
-                {SIZES.map((size) => (
+                {availableSizes.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
