@@ -16,11 +16,16 @@ export interface Product {
 const getPublicUrl = (imageUrl: string | null): string => {
   if (!imageUrl) return "/placeholder.svg";
   
-  // If it's already a full URL, return as-is
-  if (imageUrl.startsWith("http")) return imageUrl;
+  // If it's already a full Supabase storage URL, return as-is
+  if (imageUrl.startsWith("http")) {
+    return imageUrl;
+  }
   
-  // Build the public URL from the storage bucket
-  const { data } = supabase.storage.from("clothes").getPublicUrl(imageUrl);
+  // If it's just a filename or path, build the public URL
+  // Remove any leading slashes
+  const cleanPath = imageUrl.replace(/^\/+/, "");
+  
+  const { data } = supabase.storage.from("clothes").getPublicUrl(cleanPath);
   return data.publicUrl;
 };
 
