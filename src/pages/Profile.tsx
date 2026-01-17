@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Package, Calendar, ArrowLeft, Truck, CheckCircle, Clock } from "lucide-react";
+import { User, Package, Calendar, ArrowLeft, Truck, CheckCircle, Clock, Shield } from "lucide-react";
 import { format } from "date-fns";
 
 interface OrderItem {
@@ -36,6 +36,7 @@ const getOrderStatus = (createdAt: string) => {
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [roles, setRoles] = useState<string[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +50,18 @@ export default function Profile() {
       }
 
       setUser(session.user);
+
+      // Fetch roles for this user (used for admin access to manage products)
+      const { data: rolesData, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id);
+
+      if (!rolesError && rolesData) {
+        setRoles(rolesData.map((r) => r.role));
+      } else {
+        setRoles([]);
+      }
 
       // Fetch orders for this user
       const { data: ordersData, error } = await supabase
@@ -100,13 +113,37 @@ export default function Profile() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Email</p>
-              <p className="font-medium">{user?.email}</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="font-medium">{user?.email}</p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">User ID</p>
+                <p className="font-mono text-sm break-all">{user?.id}</p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Roles
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {roles.length > 0 ? (
+                    roles.map((role) => (
+                      <Badge key={role} variant={role === "admin" ? "default" : "secondary"}>
+                        {role}
+                      </Badge>
+                    ))
+                  ) : (
+                    <Badge variant="outline">No roles assigned</Badge>
+                  )}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
-
         {/* Order history */}
         <div className="space-y-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
