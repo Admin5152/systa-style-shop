@@ -115,6 +115,15 @@ export function CheckoutModal({ isOpen, onClose, cart, total, onSuccess }: Check
 
       if (dbError) throw dbError;
 
+      // Decrement stock for each item
+      for (const item of cart) {
+        const { data: pData } = await supabase.from('products').select('stock').eq('id', item.id).single();
+        if (pData) {
+          const newStock = Math.max(0, pData.stock - item.quantity);
+          await supabase.from('products').update({ stock: newStock }).eq('id', item.id);
+        }
+      }
+
       // Send email notification via EmailJS
       const itemsList = orderData.items.map(item => 
         `${item.name} x ${item.quantity} - GHS ${(item.price * item.quantity).toFixed(2)}`

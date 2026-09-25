@@ -1,7 +1,8 @@
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BracketLabel } from "@/components/ui/BracketLabel";
 
 interface ProductCardProps {
   product: Product;
@@ -20,55 +21,52 @@ export function ProductCard({
 }: ProductCardProps) {
   return (
     <div 
-      className="group cursor-pointer"
+      className="group cursor-pointer flex flex-col h-full"
       onClick={onClick}
     >
-      {/* Compact Amazon-style card */}
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted mb-4 border border-transparent group-hover:border-foreground transition-colors">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         
         {/* Wishlist button */}
         {onToggleWishlist && (
           <button
             onClick={(e) => { e.stopPropagation(); onToggleWishlist(); }}
-            className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors z-10"
+            className="absolute top-4 right-4 p-2 bg-background/0 hover:bg-background/90 backdrop-blur-none transition-all z-10"
           >
             <Heart
               className={cn(
-                "h-4 w-4 transition-colors",
+                "h-5 w-5 stroke-[1.5] transition-colors",
                 isInWishlist
-                  ? "fill-red-500 text-red-500"
-                  : "text-muted-foreground"
+                  ? "fill-accent text-accent"
+                  : "text-foreground group-hover:text-foreground"
               )}
             />
           </button>
         )}
-
-        {/* Quick add button on hover */}
-        <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button 
-            onClick={(e) => { e.stopPropagation(); onAddToCart(product); }} 
-            size="sm" 
-            className="w-full h-8 text-xs"
-          >
-            <ShoppingCart className="h-3 w-3 mr-1" />
-            Add to Cart
-          </Button>
-        </div>
       </div>
       
-      {/* Compact info section */}
-      <div className="mt-2 space-y-1">
-        <h3 className="font-medium text-sm line-clamp-2 leading-tight">
-          {product.name}
-        </h3>
-        <p className="text-lg font-bold text-primary">
-          GHS {product.price.toFixed(2)}
-        </p>
+      <div className="flex flex-col flex-grow justify-between">
+        <div className="mb-4">
+          <h3 className="font-heading font-black text-xl md:text-2xl tracking-tighter leading-none mb-2">
+            {product.name}
+          </h3>
+          <BracketLabel className="text-muted-foreground">
+            GHS {product.price.toFixed(2)}
+          </BracketLabel>
+        </div>
+
+        <Button 
+          onClick={(e) => { e.stopPropagation(); onAddToCart(product); }} 
+          size="sm" 
+          variant="outline"
+          className="w-full h-10 font-heading text-xs tracking-widest rounded-none border-foreground text-foreground hover:bg-foreground hover:text-background"
+        >
+          ADD TO CART
+        </Button>
       </div>
     </div>
   );

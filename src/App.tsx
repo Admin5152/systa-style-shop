@@ -13,11 +13,13 @@ import { useWishlist } from "@/hooks/useWishlist";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
-import Profile from "./pages/Profile";
+import Account from "./pages/Account";
 import Wishlist from "./pages/Wishlist";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
@@ -143,12 +145,14 @@ const AppContent = () => {
             />
           } 
         />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/account" element={<Account />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Footer />
 
       <CartModal
         isOpen={isCartOpen}

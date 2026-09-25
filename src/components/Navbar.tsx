@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { TopUtilityBar } from "./TopUtilityBar";
+import { useAdmin } from "@/hooks/useAdmin";
 
 interface NavbarProps {
   cartItemCount: number;
@@ -15,6 +17,7 @@ export function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -39,95 +42,96 @@ export function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            SYSTA | ƧYSTA
-          </Link>
-          
-          <div className="flex items-center gap-4 md:gap-6">
-            <Link
-              to="/"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/") ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              Home
-            </Link>
-            <Link
-              to="/products"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/products") ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              Products
-            </Link>
-            <Link
-              to="/contact"
-              className={`hidden md:inline text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/contact") ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              Contact
+    <>
+      <TopUtilityBar />
+      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            <Link to="/" className="text-2xl md:text-3xl font-heading font-black tracking-tight flex items-center">
+              SYSTA<span className="text-accent font-light">/</span>SYSTA
             </Link>
             
-            {user ? (
-              <>
+            <div className="hidden md:flex items-center gap-8 font-heading text-xs tracking-[0.15em] font-bold">
+              <Link
+                to="/"
+                className={`transition-colors hover:text-accent ${
+                  isActive("/") ? "text-accent" : "text-foreground"
+                }`}
+              >
+                HOME
+              </Link>
+              <Link
+                to="/products"
+                className={`transition-colors hover:text-accent ${
+                  isActive("/products") ? "text-accent" : "text-foreground"
+                }`}
+              >
+                SHOP
+              </Link>
+              <Link
+                to="/contact"
+                className={`transition-colors hover:text-accent ${
+                  isActive("/contact") ? "text-accent" : "text-foreground"
+                }`}
+              >
+                CONTACT
+              </Link>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {isAdmin && (
                 <Link
-                  to="/wishlist"
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    isActive("/wishlist") ? "text-primary" : "text-muted-foreground"
+                  to="/admin"
+                  className={`hidden lg:inline text-xs font-bold tracking-widest transition-colors hover:text-foreground ${
+                    isActive("/admin") ? "text-foreground" : "text-accent"
                   }`}
                 >
-                  <Heart className="h-5 w-5" />
+                  ADMIN
                 </Link>
-                <Link
-                  to="/profile"
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    isActive("/profile") ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <User className="h-5 w-5" />
-                </Link>
+              )}
+              {user ? (
+                <>
+                  <Link
+                    to="/wishlist"
+                    className="text-foreground hover:text-accent transition-colors"
+                  >
+                    <Heart className="h-5 w-5 stroke-[1.5]" />
+                  </Link>
+                  <Link
+                    to="/account"
+                    className="text-foreground hover:text-accent transition-colors"
+                  >
+                    <User className="h-5 w-5 stroke-[1.5]" />
+                  </Link>
+                  <button
+                    onClick={onCartClick}
+                    className="flex items-center gap-2 text-foreground hover:text-accent transition-colors font-heading text-xs font-bold tracking-widest"
+                  >
+                    <ShoppingCart className="h-5 w-5 stroke-[1.5]" />
+                    <span className="hidden sm:inline">[ {cartItemCount.toString().padStart(2, '0')} ]</span>
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    title="Sign out"
+                    className="text-foreground hover:text-accent transition-colors"
+                  >
+                    <LogOut className="h-5 w-5 stroke-[1.5]" />
+                  </button>
+                </>
+              ) : (
                 <Button
                   variant="outline"
-                  size="icon"
-                  onClick={onCartClick}
-                  className="relative"
+                  size="sm"
+                  onClick={() => navigate("/auth")}
+                  className="font-heading text-xs tracking-widest rounded-none border-foreground text-foreground hover:bg-foreground hover:text-background h-8"
                 >
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartItemCount > 0 && (
-                    <Badge
-                      variant="default"
-                      className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                    >
-                      {cartItemCount}
-                    </Badge>
-                  )}
+                  SIGN IN →
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleSignOut}
-                  title="Sign out"
-                >
-                  <LogOut className="h-5 w-5" />
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => navigate("/auth")}
-              >
-                <User className="h-4 w-4 mr-2" />
-                Sign In
-              </Button>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }

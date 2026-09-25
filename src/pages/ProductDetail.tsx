@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { Heart, Minus, Plus, ShoppingCart, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BracketLabel } from "@/components/ui/BracketLabel";
 
 interface ProductDetailProps {
   onAddToCart: (product: Product, quantity: number, size: string) => void;
@@ -80,20 +81,22 @@ export default function ProductDetail({
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
         {/* Back button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+        <div className="mb-12">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="font-heading text-xs tracking-widest uppercase hover:bg-transparent hover:text-accent p-0 h-auto"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            BACK TO SHOP
+          </Button>
+        </div>
 
         {/* Product detail section */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-24 mb-24">
           {/* Product image */}
-          <div className="relative aspect-square rounded-xl overflow-hidden bg-muted">
+          <div className="relative aspect-[3/4] bg-muted border border-border">
             <img
               src={product.image}
               alt={product.name}
@@ -101,112 +104,112 @@ export default function ProductDetail({
             />
             <button
               onClick={() => toggleWishlist(product.id)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+              className="absolute top-4 right-4 p-3 bg-background border border-border hover:bg-foreground hover:text-background transition-colors duration-300 group"
             >
               <Heart
                 className={cn(
-                  "h-6 w-6 transition-colors",
+                  "h-5 w-5 transition-colors stroke-[1.5]",
                   isInWishlist(product.id)
-                    ? "fill-red-500 text-red-500"
-                    : "text-muted-foreground"
+                    ? "fill-red-500 text-red-500 group-hover:text-red-500"
+                    : ""
                 )}
               />
             </button>
+            <div className="absolute top-4 left-4">
+              <BracketLabel className="bg-background/90 backdrop-blur-sm px-2 py-1">{product.category}</BracketLabel>
+            </div>
           </div>
 
           {/* Product info */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">{product.name}</h1>
-              <p className="text-muted-foreground">{product.description}</p>
-            </div>
-
-            <div className="text-3xl font-bold text-primary">
-              GHS {product.price.toFixed(2)}
-            </div>
-
-            {/* Size selection */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Size</label>
-              <div className="flex flex-wrap gap-2">
-                {availableSizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={cn(
-                      "px-4 py-2 rounded-lg border-2 font-medium transition-all",
-                      selectedSize === size
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    {size}
-                  </button>
-                ))}
+          <div className="flex flex-col justify-center">
+            <div className="mb-8">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-black tracking-tighter mb-4 uppercase">{product.name}</h1>
+              <div className="flex items-center gap-4 mb-6">
+                <BracketLabel className="text-xl">GHS {product.price.toFixed(2)}</BracketLabel>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Most popular: Medium (M)
+              <p className="text-muted-foreground font-heading text-sm leading-relaxed">
+                {product.description || "A signature piece from the SYSTA SYSTA collection. Designed with an oversized fit and premium fabric for maximum comfort and style."}
               </p>
             </div>
 
-            {/* Quantity selector */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Quantity</label>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-12 text-center font-medium text-lg">
-                  {quantity}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setQuantity(quantity + 1)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+            <div className="space-y-8 py-8 border-y border-border mb-8">
+              {/* Size selection */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <label className="font-heading text-xs tracking-widest uppercase font-bold">SELECT SIZE</label>
+                  <span className="font-accent italic text-muted-foreground text-sm">Size Guide</span>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {availableSizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={cn(
+                        "w-12 h-12 flex items-center justify-center border font-heading text-sm font-bold transition-colors",
+                        selectedSize === size
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border hover:border-foreground"
+                      )}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quantity selector */}
+              <div className="space-y-4">
+                <label className="font-heading text-xs tracking-widest uppercase font-bold">QUANTITY</label>
+                <div className="flex items-center border border-border w-fit">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    className="p-3 hover:bg-muted transition-colors disabled:opacity-50"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="w-12 text-center font-heading font-bold">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-3 hover:bg-muted transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
                 onClick={handleAddToCart}
-                variant="outline"
-                className="flex-1"
-                size="lg"
+                className="flex-1 border-2 border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-background py-4 px-8 font-heading text-sm font-black tracking-widest uppercase transition-colors duration-300 flex items-center justify-center gap-2"
               >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                Add to Cart
-              </Button>
-              <Button
+                <ShoppingCart className="h-4 w-4" />
+                ADD TO CART
+              </button>
+              <button
                 onClick={handleBuyNow}
-                className="flex-1"
-                size="lg"
+                className="flex-1 bg-accent text-white py-4 px-8 font-heading text-sm font-black tracking-widest uppercase hover:bg-accent/90 transition-colors duration-300"
               >
-                Buy Now
-              </Button>
-            </div>
-
-            {/* Category badge */}
-            <div className="pt-4 border-t">
-              <span className="text-sm text-muted-foreground">Category: </span>
-              <span className="text-sm font-medium capitalize">{product.category} Buubu</span>
+                BUY NOW →
+              </button>
             </div>
           </div>
         </div>
 
         {/* Similar products */}
         {similarProducts.length > 0 && (
-          <div className="border-t pt-8">
-            <h2 className="text-xl font-bold mb-6">Similar Products</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="pt-24 border-t border-border">
+            <div className="mb-12 text-center">
+              <BracketLabel className="mb-4 text-muted-foreground">DISCOVER MORE</BracketLabel>
+              <h2 className="text-4xl md:text-5xl font-heading font-black tracking-tighter uppercase">
+                Similar <span className="font-accent italic font-normal text-accent normal-case">Styles</span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
               {similarProducts.map((p) => (
                 <ProductCard
                   key={p.id}
