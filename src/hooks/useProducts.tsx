@@ -41,22 +41,22 @@ export const useProducts = () => {
     queryKey: ["products"],
     queryFn: async (): Promise<Product[]> => {
       const { data, error } = await supabase
-        .from("clothes")
-        .select("*")
+        .from("products")
+        .select("*, categories(name)")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
       return (data || []).map((item) => ({
         id: item.id,
-        name: item.name,
+        name: item.title,
         description: item.description,
         price: Number(item.price),
-        image: getPublicUrl(item.image_url),
-        category: item.category,
-        size: item.size,
-        color: item.color,
-        stock_quantity: item.stock_quantity,
+        image: item.images && item.images.length > 0 ? getPublicUrl(item.images[0]) : "/placeholder.svg",
+        category: item.categories?.name || "Uncategorized",
+        size: null,
+        color: null,
+        stock_quantity: item.stock,
       }));
     },
   });
@@ -67,8 +67,8 @@ export const useProduct = (id: string) => {
     queryKey: ["product", id],
     queryFn: async (): Promise<Product | null> => {
       const { data, error } = await supabase
-        .from("clothes")
-        .select("*")
+        .from("products")
+        .select("*, categories(name)")
         .eq("id", id)
         .single();
 
@@ -79,14 +79,14 @@ export const useProduct = (id: string) => {
 
       return {
         id: data.id,
-        name: data.name,
+        name: data.title,
         description: data.description,
         price: Number(data.price),
-        image: getPublicUrl(data.image_url),
-        category: data.category,
-        size: data.size,
-        color: data.color,
-        stock_quantity: data.stock_quantity,
+        image: data.images && data.images.length > 0 ? getPublicUrl(data.images[0]) : "/placeholder.svg",
+        category: data.categories?.name || "Uncategorized",
+        size: null,
+        color: null,
+        stock_quantity: data.stock,
       };
     },
     enabled: !!id,

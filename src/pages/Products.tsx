@@ -13,19 +13,20 @@ interface ProductsProps {
   toggleWishlist: (id: string) => void;
 }
 
-const categories = [
-  { value: 'all', label: 'ALL' },
-  { value: 'long', label: 'LONG' },
-  { value: 'short', label: 'SHORT' },
-  { value: 'fringe', label: 'FRINGE' },
-  { value: 'full-set', label: 'FULL SET' },
-];
-
 export default function Products({ onAddToCart, isInWishlist, toggleWishlist }: ProductsProps) {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const { data: products = [], isLoading } = useProducts();
+
+  // Generate dynamic categories from products
+  const categories = [
+    { value: 'all', label: 'ALL' },
+    ...Array.from(new Set(products.map(p => p.category))).map(cat => ({
+      value: cat,
+      label: cat.toUpperCase()
+    }))
+  ];
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;

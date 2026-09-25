@@ -33,6 +33,7 @@ export default function Admin() {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Category Form State
+  const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [catName, setCatName] = useState("");
   const [catDesc, setCatDesc] = useState("");
   const [isSubmittingCat, setIsSubmittingCat] = useState(false);
@@ -183,6 +184,18 @@ export default function Admin() {
     }
   };
 
+  const resetCategoryForm = () => {
+    setEditingCatId(null);
+    setCatName("");
+    setCatDesc("");
+  };
+
+  const handleEditCategoryClick = (cat: any) => {
+    setEditingCatId(cat.id);
+    setCatName(cat.name);
+    setCatDesc(cat.description || "");
+  };
+
   const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!catName) {
@@ -193,18 +206,22 @@ export default function Admin() {
     setIsSubmittingCat(true);
     try {
       const slug = catName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-      const { error } = await supabase.from("categories").insert({
-        name: catName,
-        slug,
-        description: catDesc
-      });
-      if (error) throw error;
-      toast.success("Category created!");
-      setCatName("");
-      setCatDesc("");
+      const catData = { name: catName, slug, description: catDesc };
+
+      if (editingCatId) {
+        const { error } = await supabase.from("categories").update(catData).eq("id", editingCatId);
+        if (error) throw error;
+        toast.success("Category updated!");
+      } else {
+        const { error } = await supabase.from("categories").insert(catData);
+        if (error) throw error;
+        toast.success("Category created!");
+      }
+      
+      resetCategoryForm();
       fetchCategories();
     } catch (error: any) {
-      toast.error(error.message || "Failed to create category");
+      toast.error(error.message || "Failed to save category");
     } finally {
       setIsSubmittingCat(false);
     }
@@ -346,7 +363,12 @@ export default function Admin() {
         {activeTab === "CATEGORIES" && (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div className="xl:col-span-1 border border-border p-6 bg-white shadow-sm h-fit">
-              <h2 className="font-heading font-bold text-lg uppercase tracking-tight mb-6">Create Category</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-heading font-bold text-lg uppercase tracking-tight">{editingCatId ? "Edit Category" : "Create Category"}</h2>
+                {editingCatId && (
+                  <Button variant="ghost" size="sm" onClick={resetCategoryForm} className="text-xs uppercase tracking-widest text-muted-foreground">Cancel</Button>
+                )}
+              </div>
               <form onSubmit={handleSaveCategory} className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-heading tracking-widest uppercase mb-2">Category Name</label>
@@ -356,9 +378,9 @@ export default function Admin() {
                   <label className="block text-[10px] font-heading tracking-widest uppercase mb-2">Description</label>
                   <Textarea value={catDesc} onChange={(e) => setCatDesc(e.target.value)} className="h-24" placeholder="Brief description..." />
                 </div>
-                <Button type="submit" className="w-full uppercase tracking-widest text-xs h-12" disabled={isSubmittingCat}>
-                  {isSubmittingCat ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                  Add Category
+                <Button type="submit" className="w-full uppercase tracking-widest text-xs h-12 bg-black text-white hover:bg-black/80" disabled={isSubmittingCat}>
+                  {isSubmittingCat ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : editingCatId ? <Save className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                  {editingCatId ? "Save Changes" : "Add Category"}
                 </Button>
               </form>
             </div>
@@ -378,7 +400,10 @@ export default function Admin() {
                           <h3 className="font-heading font-bold uppercase tracking-tight text-lg mb-1">{cat.name}</h3>
                           <p className="font-mono text-xs text-black/50">{cat.slug}</p>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(cat.id)} className="text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                        <div className="flex space-x-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEditCategoryClick(cat)} className="text-blue-600 hover:bg-blue-50"><Edit className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(cat.id)} className="text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -432,33 +457,72 @@ export default function Admin() {
                 <span className="font-mono text-xs bg-black text-white px-2 py-1">{products.length} Items</span>
               </div>
               <div className="flex-1 overflow-auto">
-                {isFetching ? <div className="p-12 text-center"><Loader2 className="animate-spin inline-block" /></div> : products.map(product => (
-                  <div key={product.id} className="p-4 flex items-center justify-between hover:bg-muted/10 border-b last:border-0 group">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-muted shrink-0 overflow-hidden">
-                        {product.images?.[0] ? <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" /> : <ImageIcon className="h-6 w-6 m-auto text-black/30" />}
-                      </div>
-                      <div>
-                        <h3 className="font-heading font-bold uppercase tracking-tight text-lg mb-1">{product.title}</h3>
-                        <div className="text-xs font-mono space-x-3 text-black/60">
-                          <span className="font-bold text-black">${product.price}</span>
-                          <span className="w-1 h-1 inline-block rounded-full bg-border" />
-                          <span>Stock: {product.stock}</span>
-                          {product.categories?.name && (
-                            <>
-                              <span className="w-1 h-1 inline-block rounded-full bg-border" />
-                              <span className="bg-black/5 px-2 py-0.5 uppercase tracking-widest text-[10px] font-bold text-black">{product.categories.name}</span>
-                            </>
-                          )}
+                {isFetching ? <div className="p-12 text-center"><Loader2 className="animate-spin inline-block" /></div> : (
+                  <div className="pb-8">
+                    {categories.map(cat => {
+                      const catProducts = products.filter(p => p.category_id === cat.id);
+                      if (catProducts.length === 0) return null;
+                      return (
+                        <div key={cat.id} className="mb-6">
+                          <h3 className="bg-black/5 px-4 py-2 font-heading font-bold text-xs uppercase tracking-widest border-y border-black/10">{cat.name}</h3>
+                          {catProducts.map(product => (
+                            <div key={product.id} className="p-4 flex items-center justify-between hover:bg-muted/10 border-b last:border-0 group">
+                              <div className="flex items-center space-x-4">
+                                <div className="w-16 h-16 bg-muted shrink-0 overflow-hidden">
+                                  {product.images?.[0] ? <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" /> : <ImageIcon className="h-6 w-6 m-auto text-black/30" />}
+                                </div>
+                                <div>
+                                  <h3 className="font-heading font-bold uppercase tracking-tight text-lg mb-1">{product.title}</h3>
+                                  <div className="text-xs font-mono space-x-3 text-black/60">
+                                    <span className="font-bold text-black">${product.price}</span>
+                                    <span className="w-1 h-1 inline-block rounded-full bg-border" />
+                                    <span>Stock: {product.stock}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex space-x-2">
+                                <Button variant="ghost" size="icon" onClick={() => handleEditClick(product)} className="text-blue-600 hover:bg-blue-50"><Edit className="h-4 w-4" /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEditClick(product)} className="text-blue-600 hover:bg-blue-50"><Edit className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
-                    </div>
+                      );
+                    })}
+                    
+                    {/* Uncategorized Products */}
+                    {(() => {
+                      const uncategorized = products.filter(p => !p.category_id);
+                      if (uncategorized.length === 0) return null;
+                      return (
+                        <div className="mb-6">
+                          <h3 className="bg-red-50 text-red-800 px-4 py-2 font-heading font-bold text-xs uppercase tracking-widest border-y border-red-200">Uncategorized (Needs Category)</h3>
+                          {uncategorized.map(product => (
+                            <div key={product.id} className="p-4 flex items-center justify-between hover:bg-muted/10 border-b last:border-0 group bg-red-50/30">
+                              <div className="flex items-center space-x-4">
+                                <div className="w-16 h-16 bg-muted shrink-0 overflow-hidden">
+                                  {product.images?.[0] ? <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" /> : <ImageIcon className="h-6 w-6 m-auto text-black/30" />}
+                                </div>
+                                <div>
+                                  <h3 className="font-heading font-bold uppercase tracking-tight text-lg mb-1">{product.title}</h3>
+                                  <div className="text-xs font-mono space-x-3 text-black/60">
+                                    <span className="font-bold text-black">${product.price}</span>
+                                    <span className="w-1 h-1 inline-block rounded-full bg-border" />
+                                    <span>Stock: {product.stock}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex space-x-2">
+                                <Button variant="ghost" size="icon" onClick={() => handleEditClick(product)} className="text-blue-600 hover:bg-blue-50"><Edit className="h-4 w-4" /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
